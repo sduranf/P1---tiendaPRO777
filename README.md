@@ -52,29 +52,5 @@ CustomShirt Pro is a comprehensive e-commerce web application that allows users 
 - **Payment Processing**: Stripe or PayPal integration
 - **Email Service**: Transactional email notifications
 
-## Project Structure
-
-```
-CustomShirt-Pro/
-├── backend/                 # Django backend application
-│   ├── api/                # REST API endpoints
-│   ├── core/               # Core Django settings
-│   ├── designs/            # Design management app
-│   ├── orders/             # Order processing app
-│   ├── users/              # User management app
-│   └── ai_services/        # AI integration services
-├── frontend/               # React frontend application
-│   ├── src/
-│   │   ├── components/     # Reusable UI components
-│   │   ├── pages/          # Page components
-│   │   ├── services/       # API service calls
-│   │   ├── store/          # State management
-│   │   └── utils/          # Utility functions
-│   └── public/             # Static assets
-├── ai_models/              # AI model files and configurations
-├── docs/                   # Documentation
-└── tests/                  # Test suites
-```
-
 
 **CustomShirt Pro** - Where creativity meets technology in custom fashion design.
