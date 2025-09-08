@@ -54,3 +54,18 @@ CustomShirt Pro is a comprehensive e-commerce web application that allows users 
 
 
 **CustomShirt Pro** - Where creativity meets technology in custom fashion design.
+
+## Installation
+Clone the repository by typing the following command:
+```
+git clone https://github.com/S4mpl3r/django-ecommerce.git
+```
+Then create a python virtual environment for this project and activate it.
+Then cd into the project directory and run the following command to install the requirements:
+```
+pip install -r requirements.txt
+```
+After this, you can apply the database migrations and start the server:
+```
+python manage.py migrate
+python manage.py runserver
