@@ -14,18 +14,19 @@
         <div class="row no-gutters">
         <div class="col-md-8">
             <h3 class="card-header">
-                {{ item.title }}
+                {{ item.item.title }}
             </h3>
             <div class="card-body">
+                <p class="card-text">Talla: <strong>{{ item.size }}</strong></p>
                 <p class="card-text">Price:
-                {% if item.is_on_sale %}
-                    <span class="text-muted text-decoration-line-through">${{ item.price }}</span>
-                    ${{ item.discounted_price }}
+                {% if item.item.is_on_sale %}
+                    <span class="text-muted text-decoration-line-through">${{ item.item.price }}</span>
+                    ${{ item.item.discounted_price }}
                 {% else %}
-                    ${{ item.price }}
+                    ${{ item.item.price }}
                 {% endif %}
                 </p>
-                <a href="{% url "cart:remove_from_cart" item.id %}" class="btn btn-outline-danger fs-5">Remove</a>
+                <a href="{% url 'cart:remove_from_cart' item.item.id item.size %}" class="btn btn-outline-danger fs-5">Remove</a>
             </div>
         </div>
         </div>
@@ -34,7 +35,7 @@
     {% if cart_items %}
     <div class="card border-light my-3 text-center">
         <p class="fs-5"><strong>Total: ${{ sum }}</strong></p>
-        <a href="{% url "cart:purchase" %}" class="btn btn-outline-dark fs-5 card-body">Buy</a>
+        <a href="{% url 'cart:purchase' %}" class="btn btn-outline-dark fs-5 card-body">Buy</a>
     </div>
     {% endif %}
 </div>

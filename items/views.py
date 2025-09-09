@@ -56,3 +56,6 @@ def browse(request):
             "category_id": int(category_id),
         },
     )
+
+def about(request):
+    return render(request, "items/about.html")
