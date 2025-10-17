@@ -9,7 +9,7 @@ from django.views.decorators.http import require_POST
 def add_to_cart(request, item_id):
     size = request.POST.get("size")
     if not size:
-        return redirect("items:detail", item_id=item_id)
+        return redirect("items:detail", pk=item_id)
     if "cart_items" in request.session.keys():
         # Verifica que el item con la talla no se agregue dos veces
         if not any(
@@ -57,11 +57,11 @@ def purchase(request):
         receipt = PurchaseReceipt(buyer=request.user)
         receipt.save()
         total = 0
-        for item_id in request.session["cart_items"]:
-            item = Item.objects.get(pk=item_id)
+        for cart_item in request.session["cart_items"]:
+            item = Item.objects.get(pk=cart_item["id"])
             receipt.items.add(item)
             total += item.discounted_price()
         receipt.total = total
         receipt.save()
-        request.session.pop("cart_items")
+        request.session.pop("cart_items", None)
         return redirect("user_profile:purchases")

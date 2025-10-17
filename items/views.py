@@ -6,10 +6,7 @@ from .models import Category, Item
 
 # Create your views here.
 def index(request):
-    items = get_list_or_404(Item, is_sold=False)[:8]
-    for item in items:
-        if item.is_on_sale:
-            item.discount = item.discounted_price()
+    items = Item.objects.filter(is_sold=False)[:8]
     return render(
         request,
         "items/index.html",
@@ -21,8 +18,6 @@ def index(request):
 
 def detail(request, pk):
     item = get_object_or_404(Item, pk=pk)
-    if item.is_on_sale:
-        item.discount = item.discounted_price()
     return render(
         request,
         "items/detail.html",
@@ -34,11 +29,11 @@ def detail(request, pk):
 
 def browse(request):
     query = request.GET.get("query", "")
-    category_id = request.GET.get("category", 0)
+    category_id = request.GET.get("category", "0")
     categories = Category.objects.all()
     items = Item.objects.filter(is_sold=False)
 
-    if category_id:
+    if category_id and category_id != "0":
         items = items.filter(category_id=category_id)
 
     if query:

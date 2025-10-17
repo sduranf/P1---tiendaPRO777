@@ -35,7 +35,7 @@
                             <!-- Product price-->
                             {% if item.is_on_sale %}
                             <span class="text-muted text-decoration-line-through">${{ item.price }}</span>
-                            ${{ item.discount }}
+                            ${{ item.discounted_price }}
                             {% else %}
                             ${{ item.price }}
                             {% endif %}

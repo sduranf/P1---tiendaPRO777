@@ -14,12 +14,12 @@
                 <p class="card-text">Price:
                 {% if item.is_on_sale %}
                     <span class="text-muted text-decoration-line-through">${{ item.price }}</span>
-                    ${{ item.discount }}
+                    ${{ item.discounted_price }}
                 {% else %}
                     ${{ item.price }}
                 {% endif %}
                 </p>
-                {% if user.is_authenticated %}
+                {% if user.is_authenticated and not item.is_sold %}
                 <form method="post" action="{% url 'cart:add_to_cart' item.id %}">
                     {% csrf_token %}
                     <label for="size" class="form-label">Talla:</label>
@@ -31,6 +31,8 @@
                     </select>
                     <button type="submit" class="btn btn-outline-dark fs-5">Agregar al carrito</button>
                 </form>
+                {% elif item.is_sold %}
+                <div class="alert alert-secondary" role="alert">Producto no disponible</div>
                 {% endif %}
             </div>
         </div>
