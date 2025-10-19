@@ -7,6 +7,13 @@
         <div class="text-center text-white">
             <h1 class="display-4 fw-bolder">Welcome to CustomShirt</h1>
             <p class="lead fw-normal text-white-50 mb-0">Customize anything you want to your heart's desire!</p>
+            {% if user.is_authenticated %}
+            <div class="mt-4">
+                <a href="{% url 'items:create_item' %}" class="btn btn-light">
+                    <i class="bi bi-plus-lg"></i> Create new cloth
+                </a>
+            </div>
+            {% endif %}
         </div>
     </div>
 </header>

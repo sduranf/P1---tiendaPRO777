@@ -164,3 +164,7 @@ __pycache__/
 *.py[cod]
 *.sqlite3
 db.sqlite3
+
+openAI.env
+*.env
+.env
