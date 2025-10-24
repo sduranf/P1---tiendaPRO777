@@ -160,15 +160,11 @@ def purchase(request):
 
             receipt.total = total
             receipt.save()
-            # Generar y guardar el PDF del recibo
-            from items.utils import generar_recibo_pdf
-            recibo_pdf = generar_recibo_pdf(pedido)
-            pedido.recibo_pdf.save(recibo_pdf.name, recibo_pdf)
-            pedido.save()
+            # No generar PDF automáticamente - se generará bajo demanda
             cart.items.all().delete()
             request.session['carrito_personalizado'] = []
             request.session.modified = True
-            # Redirigir a la descarga del PDF en una nueva pestaña y luego al historial
+            # Redirigir a la página de compra exitosa
             return render(request, "cart/compra_exitosa.html", {"pedido": pedido})
         else:
             # Si el formulario no es válido, mostrar errores

@@ -28,8 +28,14 @@ from .models import Pedido
 def pedido_recibo_pdf(request, pedido_id):
     try:
         pedido = Pedido.objects.get(id=pedido_id, nombre_cliente=request.user.nombre)
+        
+        # Si no existe el PDF, generarlo bajo demanda
         if not pedido.recibo_pdf:
-            raise Http404("Recibo no encontrado")
+            from .utils import generar_recibo_pdf
+            recibo_pdf = generar_recibo_pdf(pedido)
+            pedido.recibo_pdf.save(recibo_pdf.name, recibo_pdf)
+            pedido.save()
+        
         return FileResponse(pedido.recibo_pdf.open('rb'), content_type='application/pdf')
     except Pedido.DoesNotExist:
         raise Http404("Pedido no encontrado")

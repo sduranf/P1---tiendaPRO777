@@ -1,0 +1,76 @@
+{% extends "items/base.html" %}
+
+{% block title %}Dashboard Administrador - TiendaPRO777{% endblock title %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-warning">
+                <h2>Panel de Administración</h2>
+                <p>Bienvenido, {{ user.nombre }}. Aquí tienes acceso completo al sistema.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Panel de Administración Django</h5>
+                    <p class="card-text">Acceso completo al panel de administración</p>
+                    <a href="{% url 'admin:index' %}" class="btn btn-primary">
+                        <i class="fas fa-cog"></i> Ir al Admin
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Catálogo de Productos</h5>
+                    <p class="card-text">Explora y gestiona productos</p>
+                    <a href="{% url 'items:browse' %}" class="btn btn-success">
+                        <i class="fas fa-store"></i> Ver Catálogo
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Mi Perfil</h5>
+                    <p class="card-text">Gestiona tu perfil de administrador</p>
+                    <a href="{% url 'user_profile:user_profile' %}" class="btn btn-secondary">
+                        <i class="fas fa-user"></i> Ver Perfil
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Información del Administrador</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Nombre:</strong> {{ user.nombre }}</p>
+                            <p><strong>Email:</strong> {{ user.correo }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Tipo de Usuario:</strong> {{ user.get_tipo_usuario_display }}</p>
+                            <p><strong>Último Acceso:</strong> {{ user.last_login|date:"d/m/Y H:i" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
