@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+<!-- Header -->
+<header class="bg-success py-5">
+    <div class="container px-4 px-lg-5 my-5 text-center text-white">
+        <h1 class="display-4 fw-bolder">Finaliza tu compra 🛒</h1>
+        <p class="lead fw-normal text-white-50 mb-0">
+            Revisa y confirma los productos en tu carrito antes de continuar al pago.
+        </p>
+    </div>
+</header>
+
+<!-- Resumen de orden -->
+<section class="py-5 bg-light">
+    <div class="container px-4 px-lg-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card shadow border-0 rounded-4 mb-5">
+                    <div class="card-header bg-success text-white fw-semibold">
+                        <i class="bi bi-bag-check-fill me-2"></i> Resumen de Orden
+                    </div>
+                    <div class="card-body text-center">
+                        <ul class="list-group mb-4">
+                            {% for product in cart_products %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="fw-semibold">{{ product.name }}</span>
+                                <span>x 
+                                    {% for key, value in quantities.items %}
+                                        {% if key == product.id|slugify %}
+                                            {{ value }}
+                                        {% endif %}
+                                    {% endfor %}
+                                </span>
+                                {% if product.is_sale %}
+                                    <span>
+                                        <small class="text-muted text-decoration-line-through">${{ product.price|intcomma }}</small>
+                                        <strong class="text-success">${{ product.sale_price|intcomma }}</strong>
+                                    </span>
+                                {% else %}
+                                    <strong class="text-dark">${{ product.price|intcomma }}</strong>
+                                {% endif %}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        <p class="card-text fs-5">
+                            <strong>Total: </strong><span class="text-success fw-bold">${{ cart_total|intcomma }}</span>
+                        </p>
+                        <a href="{% url 'cart_summary' %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-pencil-square me-1"></i> Editar Orden
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Información de envío -->
+                <div class="card shadow border-0 rounded-4 mb-5">
+                    <div class="card-header bg-success text-white fw-semibold">
+                        <i class="bi bi-truck me-2"></i> Información de Envío
+                    </div>
+                    <div class="card-body text-start">
+                        <ul class="list-group">
+                            <li class="list-group-item"><strong>Nombre:</strong> {{ profile.user.first_name }} {{ profile.user.last_name }}</li>
+                            <li class="list-group-item"><strong>Correo:</strong> {{ profile.user.email }}</li>
+                            <li class="list-group-item"><strong>Teléfono:</strong> {{ profile.phone|default:"No registrado" }}</li>
+                            <li class="list-group-item"><strong>Dirección 1:</strong> {{ profile.address1|default:"No registrada" }}</li>
+                            {% if profile.address2 %}
+                                <li class="list-group-item"><strong>Dirección 2:</strong> {{ profile.address2 }}</li>
+                            {% endif %}
+                            <li class="list-group-item"><strong>Ciudad:</strong> {{ profile.city|default:"No registrada" }}</li>
+                            <li class="list-group-item"><strong>Departamento:</strong> {{ profile.state|default:"No registrado" }}</li>
+                            <li class="list-group-item"><strong>Código Postal:</strong> {{ profile.zip_code|default:"No registrado" }}</li>
+                            <li class="list-group-item"><strong>País:</strong> {{ profile.country|default:"No registrado" }}</li>
+                        </ul>
+                        <div class="text-center mt-4">
+                            <a href="{% url 'update_user' %}" class="btn btn-outline-secondary btn-sm">
+                                <i class="bi bi-pencil-fill me-1"></i> Editar Información
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones finales -->
+                <div class="card shadow border-0 rounded-4 text-center">
+                    <div class="card-body py-4">
+                        <a href="{% url 'billing_info' %}" class="btn btn-success btn-lg px-5 me-2">
+                            <i class="bi bi-credit-card-fill me-1"></i> Continuar al Pago
+                        </a>
+                        <a href="{% url 'cart_summary' %}" class="btn btn-outline-danger btn-lg px-5">
+                            <i class="bi bi-x-circle me-1"></i> Cancelar
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

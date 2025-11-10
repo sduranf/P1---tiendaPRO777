@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<!-- Header con imagen personalizada -->
+<header 
+  class="py-5 text-white" 
+  style="
+    background-image: url('{% static 'assets/about_clothes.jpg' %}');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+  "
+>
+  <!-- Capa verde translúcida encima -->
+  <div style="
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(25, 135, 84, 0.85); /* verde Bootstrap semiopaco */
+    ">
+  </div>
+
+  <div class="container px-4 px-lg-5 my-5 text-center" style="position: relative; z-index: 1;">
+    <h1 class="display-4 fw-bold">Sobre Nosotros</h1>
+    <p class="lead fw-normal text-white-50 mb-0">
+      En <strong>JCustom</strong> creemos que la ropa debe reflejar tu esencia. 
+      Nacimos con la idea de ofrecer prendas básicas de la mejor calidad, 
+      que puedas personalizar para mostrar tu propio estilo con confianza y actitud.
+    </p>
+  </div>
+</header>
+
+
+<!-- Sección principal -->
+<section class="py-5 bg-light">
+  <br/><br/><br/><br/><br/>
+  <div class="container px-4 px-lg-5">
+    <div class="row gx-5 align-items-center">
+      <div class="col-lg-6 mb-4 mb-lg-0">
+        <h2 class="fw-bold text-success mb-3">Nuestra misión 👕</h2>
+        <p class="text-muted mb-4">
+          Brindar una experiencia única donde cada cliente pueda diseñar su propia prenda,
+          combinando calidad, comodidad y creatividad. Queremos que cada pieza sea una extensión 
+          auténtica de quien la usa.
+        </p>
+      </div>
+      <div class="col-lg-6">
+        <h2 class="fw-bold text-success mb-3">Nuestros valores ✨</h2>
+        <ul class="list-unstyled text-muted">
+          <li>💎 Pasión por la calidad</li>
+          <li>🎨 Libertad creativa</li>
+          <li>🤝 Honestidad y cercanía</li>
+          <li>🚀 Innovación en cada diseño</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <br/><br/><br/><br/><br/>
+</section>
+<!-- Frase final -->
+<section class="py-5 bg-success text-white text-center">
+  <div class="container px-4 px-lg-5">
+    <h3 class="fw-bold mb-3">"Más que ropa, creamos identidad personalizada"</h3>
+    <p class="lead mb-0">JCustom – Tu estilo, a tu manera 👕</p>
+  </div>
+</section>
+
+
+
+{% endblock %}

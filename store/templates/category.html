@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+
+<!-- Encabezado -->
+<header class="category-header text-black py-5">
+  <div class="container text-center">
+    <h1 class="display-5 fw-bold">{{ category.name }}</h1>
+    <p class="lead text-light-50 mb-0">Explora nuestra selección de {{ category.name|lower }} personalizables.</p>
+  </div>
+</header>
+
+<!-- Sección de productos -->
+<section class="py-5 bg-light">
+  <br/><br/><br/><br/><br/>
+  <div class="container px-4 px-lg-5 mt-4">
+    {% if products %}
+    <div class="row gx-4 gx-lg-5 row-cols-1 row-cols-md-3 row-cols-xl-4 justify-content-center">
+
+      {% for product in products %}
+      <div class="col mb-5">
+        <div class="card h-100 shadow-sm border-0 rounded-4">
+          
+          {% if product.is_sale %}
+          <div class="badge bg-success text-white position-absolute" style="top: 0.5rem; right: 0.5rem">
+            Oferta
+          </div>
+          {% endif %}
+          
+          <img class="card-img-top rounded-top" src="{{ product.image.url }}" alt="{{ product.name }}" style="object-fit: cover; height: 220px;" />
+
+          <div class="card-body p-4 text-center">
+            <h5 class="fw-semibold text-dark">{{ product.name }}</h5>
+            {% if product.is_sale %}
+              <span class="text-muted text-decoration-line-through">${{ product.price|intcomma }}</span>
+              <span class="text-success fw-bold d-block">${{ product.sale_price|intcomma }}</span>
+            {% else %}
+              <span class="fw-bold text-success">${{ product.price|intcomma }}</span>
+            {% endif %}
+          </div>
+
+          <div class="card-footer bg-transparent border-0 text-center pb-3">
+            <a href="{% url 'customization:product' product.id %}" class="btn btn-outline-success w-75 rounded-pill">
+              Ver Prenda
+            </a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+
+    </div>
+    {% else %}
+      <div class="text-center py-5">
+        <h4 class="text-muted">No hay prendas disponibles en esta categoría 👕</h4>
+        <a href="{% url 'home' %}" class="btn btn-outline-success mt-3">Volver a la tienda</a>
+      </div>
+    {% endif %}
+  </div>
+  <br/><br/><br/><br/><br/><br/>
+</section>
+
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<header class="bg-success py-5 text-white shadow-sm">
+    <div class="container text-center">
+        <h1 class="display-5 fw-bolder">Crea tu cuenta</h1>
+        <p class="lead text-white-50">
+            Únete a <strong>KulturaUrbana</strong> y diseña tus prendas favoritas a tu estilo 👕✨
+        </p>
+    </div>
+</header>
+
+<section class="py-5 bg-light">
+    <div class="container d-flex justify-content-center">
+        <div class="card shadow border-0 rounded-4 p-5" style="max-width: 500px; width: 100%;">
+            <form method="POST" action="{% url 'register' %}">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-success w-100 py-2 fw-semibold mt-3">
+                    Registrarse
+                </button>
+
+                <p class="text-center mt-4 mb-0 text-muted">
+                    ¿Ya tienes una cuenta?
+                    <a href="{% url 'login' %}" class="text-success fw-semibold">Inicia sesión aquí</a>
+                </p>
+            </form>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

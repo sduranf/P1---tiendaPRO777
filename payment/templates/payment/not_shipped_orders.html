@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Header -->
+<header class="bg-success py-5">
+    <div class="container px-4 px-lg-5 my-5">
+        <div class="text-center text-white">
+            <h1 class="display-4 fw-bolder">Órdenes Pendientes 👚</h1>
+            <p class="lead fw-normal text-white-50 mb-0">
+                Aquí puedes ver las órdenes que aún no han sido entregadas.
+            </p>
+        </div>
+    </div>
+</header>
+
+<!-- Contenido principal -->
+<section class="py-5 bg-light">
+    <br/><br/><br/><br/><br/><br/><br/><br/>
+    <div class="container px-4 px-lg-5">
+        {% if orders %}
+        <div class="card shadow border-0 rounded-4 p-4">
+            <h4 class="fw-bold text-success mb-4">
+                <i class="bi bi-hourglass-split me-2"></i>Listado de órdenes pendientes
+            </h4>
+            
+            <div class="table-responsive">
+                <table class="table table-hover align-middle text-center">
+                    <thead class="table-success text-dark">
+                        <tr>
+                            <th scope="col">Orden</th>
+                            <th scope="col">Precio</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Fecha de Orden</th>
+                            <th scope="col">Entregado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in orders %}
+                        <tr>
+                            <td class="fw-semibold">
+                                <a href="{% url 'order_details' item.id %}" class="text-success text-decoration-none fw-bold">
+                                    {{ item.id }}
+                                </a>
+                            </td>
+                            <td>${{ item.amount_paid }}</td>
+                            <td>{{ item.email }}</td>
+                            <td>{{ item.date_ordered|date:"d/m/Y" }}</td>
+                            <td>
+                                <form method="POST" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="shipping_status" value="true">
+                                    <input type="hidden" name="num" value="{{ item.id }}">
+                                    <button type="submit" class="btn btn-outline-success btn-sm rounded-circle" title="Marcar como entregado">
+                                        <i class="bi bi-check-lg"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% else %}
+        <br/><br/><br/><br/><br/>
+        <div class="text-center py-5">
+            <h5 class="text-muted">No hay órdenes pendientes en este momento 👖</h5>
+        </div>
+        <br/><br/><br/><br/><br/> 
+        {% endif %}
+    </div>
+        <br/><br/><br/><br/><br/><br/><br/><br/><br/>
+        
+</section>
+{% endblock %}

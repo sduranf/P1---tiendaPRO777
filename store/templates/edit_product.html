@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<header class="bg-success py-5 text-white shadow-sm">
+    <div class="container text-center">
+        <h1 class="display-5 fw-bolder">Editar Producto</h1>
+        <p class="lead text-white-50">Actualiza los datos del producto seleccionado 👖</p>
+    </div>
+</header>
+
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <div class="card shadow border-0 rounded-4 p-4">
+                    <h5 class="fw-bold text-success mb-4 text-center">{{ product.name }}</h5>
+
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-success py-2 fw-semibold">
+                                Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="text-center mt-3">
+                        <a href="{% url 'edit_products' %}" class="text-success text-decoration-none">
+                            ← Volver al listado
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

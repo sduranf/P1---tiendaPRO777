@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+
+<header class="bg-success py-5 text-white shadow-sm">
+    <div class="container text-center">
+        <h1 class="display-5 fw-bolder">Tu Carrito 🛒</h1>
+        <p class="lead text-white-50">Revisa tus productos antes de finalizar la compra.</p>
+    </div>
+</header>
+
+<section class="py-5 bg-light">
+    <br/><br/><br/><br/><br/><br/>
+    <div class="container">
+        {% if cart %}
+        <div class="card shadow border-0 rounded-4 p-4">
+            {% for product_id, data in cart.items %}
+                {% with qty=data.0 image=data.1 %}
+                {% for product in cart_products %}
+                    {% if product.id|stringformat:"s" == product_id|stringformat:"s" %}
+                    <div class="d-flex align-items-center justify-content-between border-bottom py-3 flex-wrap">
+
+                        <!-- Imagen + Nombre -->
+                        <div class="d-flex align-items-center mb-2 mb-md-0">
+                            <img src="{{ image }}" alt="{{ product.name }}" 
+                                class="rounded me-3 shadow-sm" 
+                                style="width: 80px; height: 80px; object-fit: cover;">
+                            <div>
+                                <h5 class="fw-bold text-success mb-1">{{ product.name }}</h5>
+                                {% if product.is_sale %}
+                                    <small class="text-decoration-line-through text-muted">${{ product.price|intcomma }}</small>
+                                    <span class="fw-semibold text-dark ms-2">${{ product.sale_price|intcomma }}</span>
+                                {% else %}
+                                    <span class="fw-semibold text-dark">${{ product.price|intcomma }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Cantidad + Botones -->
+                        <div class="d-flex align-items-center gap-2">
+                            {% csrf_token %}
+                            {% for key, value in quantities.items %}
+                                {% if key == product.id|slugify %}
+                                    <input type="number" name="quantity" value="{{ value }}" min="1"
+                                        class="form-control form-control-sm text-center no-spin border-success"
+                                        style="width: 70px;" id="select{{ product.id }}">
+                                {% endif %}
+                            {% endfor %}
+                            <button type="submit" data-index="{{ product.id }}" class="btn btn-outline-success btn-sm update-cart">
+                                <i class="bi bi-arrow-repeat"></i>
+                            </button>
+                            <button type="submit" data-index="{{ product.id }}" class="btn btn-outline-danger btn-sm delete-product">
+                                <i class="bi bi-trash3"></i>
+                            </button>
+                        </div>
+
+                    </div>
+                    {% endif %}
+                {% endfor %}
+                {% endwith %}
+            {% endfor %}
+
+
+
+            <!-- Total -->
+            <div class="text-end mt-4">
+                <h4 class="fw-bold text-success">Total: ${{ cart_total|intcomma }}</h4>
+                <a href="{% url 'checkout' %}" class="btn btn-success btn-lg mt-3 px-5">
+                    Finalizar Compra 💸
+                </a>
+            </div>
+        </div>
+
+        {% else %}
+        <br/><br/><br/><br/><br/>
+        <div class="text-center my-5">
+            <h5 class="text-muted">Tu carrito está vacío 👕📋</h5>
+            <a href="{% url 'home' %}" class="btn btn-outline-success mt-3">Volver a la tienda</a>
+        </div>
+        <br/><br/><br/><br/><br/>
+        {% endif %}
+    </div>
+    <br/><br/><br/><br/><br/><br/>
+</section>
+
+<script>
+$(document).on('click', '.update-cart', function(e){
+    e.preventDefault();
+    var productid = $(this).data('index');
+    $.ajax({
+        type: 'POST',
+        url: '{% url "cart_update" %}',
+        data: {
+            product_id: productid,
+            product_qty: $('#select' + productid).val(),
+            csrfmiddlewaretoken: '{{ csrf_token }}',
+            action: 'post'
+        },
+        success: function(){ location.reload(); }
+    });
+});
+
+$(document).on('click', '.delete-product', function(e){
+    e.preventDefault();
+    $.ajax({
+        type: 'POST',
+        url: '{% url "cart_delete" %}',
+        data: {
+            product_id: $(this).data('index'),
+            csrfmiddlewaretoken: '{{ csrf_token }}',
+            action: 'post'
+        },
+        success: function(){ location.reload(); }
+    });
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content%}
+<!-- Header-->
+<header class="hero-section text-white text-center d-flex align-items-center justify-content-center">
+  <div class="container">
+    <h1 class="display-4 fw-bold mb-3">Personaliza tu estilo a tu manera</h1>
+    <p class="lead mb-4">Diseños únicos, calidad premium y prendas que hablan de ti 👕✨</p>
+    <a href="{% url 'about' %}" class="btn btn-success btn-lg rounded-pill shadow-sm">
+        ¿Quiénes Somos?
+    </a>
+  </div>
+</header>
+
+<!-- Section-->
+<section class="py-5">
+    <div class="container px-4 px-lg-5 mt-5">
+        <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
+
+            {% load humanize %}
+            {% for product in products %}
+                {% if product.is_sale %}
+                <div class="col mb-5">
+                    <div class="card h-100">
+                        <!-- Sale badge-->
+                        <div class="badge bg-dark text-white position-absolute" style="top: 0.5rem; right: 0.5rem">Oferta</div>
+                        <!-- Product image-->
+                        <img class="card-img-top" src="{{ product.image.url }}" alt="..." />
+                        <!-- Product details-->
+                        <div class="card-body p-4">
+                            <div class="text-center">
+                                <!-- Product name-->
+                                <h5 class="fw-bolder">{{ product.name }}</h5>
+                                <!-- Product price-->
+                                <span class="text-muted text-decoration-line-through">${{ product.price|intcomma }}</span>
+                                ${{ product.sale_price|intcomma }}
+                            </div>
+                        </div>
+                        <!-- Product actions-->
+                        <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
+                            <div class="text-center">
+                                <a class="btn btn-outline-dark mt-auto" href="{% url 'customization:product' product.id %}">
+                                    Ver Prenda
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="col mb-5">
+                    <div class="card h-100">
+                        <!-- Product image-->
+                        <img class="card-img-top" src="{{ product.image.url }}" alt="..." />
+                        <!-- Product details-->
+                        <div class="card-body p-4">
+                            <div class="text-center">
+                                <!-- Product name-->
+                                <h5 class="fw-bolder">{{ product.name }}</h5>
+                                <!-- Product price-->
+                                ${{ product.price|intcomma }}
+                            </div>
+                        </div>
+                        <!-- Product actions-->
+                        <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
+                            <div class="text-center">
+                                <a class="btn btn-outline-dark mt-auto" href="{% url 'customization:product' product.id %}">
+                                    Ver Prenda
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
+            
+        </div>
+    </div>
+</section>
+
+<style>
+.hero-section {
+  background: 
+    linear-gradient(rgba(21, 71, 52, 0.6), rgba(21, 71, 52, 0.6)),
+    url("{% static 'assets/banner_clothes.jpg' %}") center/cover no-repeat;
+  height: 75vh;
+  color: #fff;
+}
+
+.hero-section h1 {
+  font-size: 2.8rem;
+  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.hero-section p {
+  font-size: 1.2rem;
+  color: #e9f5ee;
+}
+
+.hero-section .btn {
+  background-color: #43a047;
+  border: none;
+  padding: 0.8rem 2rem;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.hero-section .btn:hover {
+  background-color: #388e3c;
+  transform: scale(1.05);
+}
+
+.btn-outline-dark {
+  color: #212529 !important;
+  border-color: #212529 !important;
+}
+
+</style>
+
+{% endblock%}

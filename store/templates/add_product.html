@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content%}
+
+<!-- Header-->
+<header class="bg-success py-5 text-white shadow-sm">
+    <div class="container text-center">
+        <h1 class="display-5 fw-bolder">Agregar Producto</h1>
+        <p class="lead text-white-50">Completa el formulario para añadir un nuevo artículo a la tienda 👕✨</p>
+    </div>
+</header>
+<br/><br/>
+<div class="container px-4 px-lg-5 my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <form method="POST" action="{% url 'add_product' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <br/><br/>
+                <button type="submit" class="btn btn-secondary">Agregar</button>
+            </form>
+        </div>
+    </div>
+</div>
+<br/>
+{% endblock %}
