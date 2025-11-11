@@ -9,4 +9,6 @@ urlpatterns = [
     path('shipped_orders/', views.shipped_orders, name='shipped_orders'),
     path('not_shipped_orders/', views.not_shipped_orders, name='not_shipped_orders'),
     path('orders/<int:order_id>/details/', views.order_details, name='order_details'),
+    path('order_history/', views.order_history, name='order_history'),
+    path('orders/<int:order_id>/receipt/', views.generate_receipt, name='generate_receipt'),
 ]

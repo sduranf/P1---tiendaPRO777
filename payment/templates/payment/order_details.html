@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load humanize %}
 
 {% block content %}
 <header class="bg-success py-5">
@@ -14,6 +15,38 @@
 <section class="py-5 bg-light">
     <div class="container px-4 px-lg-5">
         <div class="card shadow border-0 rounded-4 p-4">
+            <!-- Información de la orden -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h5 class="fw-bold text-success mb-3">
+                        <i class="bi bi-info-circle me-2"></i>Información de la Orden
+                    </h5>
+                    <p class="mb-1"><strong>Fecha:</strong> {{ order.date_ordered|date:"d/m/Y H:i" }}</p>
+                    <p class="mb-1"><strong>Cliente:</strong> {{ order.full_name }}</p>
+                    <p class="mb-1"><strong>Email:</strong> {{ order.email }}</p>
+                    <p class="mb-1">
+                        <strong>Estado:</strong> 
+                        {% if order.shipped %}
+                            <span class="badge bg-success">Enviada</span>
+                            {% if order.shipped_date %}
+                                <small class="text-muted">({{ order.shipped_date|date:"d/m/Y" }})</small>
+                            {% endif %}
+                        {% else %}
+                            <span class="badge bg-warning text-dark">Pendiente</span>
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="fw-bold text-success mb-3">
+                        <i class="bi bi-cash-coin me-2"></i>Resumen de Pago
+                    </h5>
+                    <p class="mb-1"><strong>Total de productos:</strong> {{ order_items|length }}</p>
+                    <p class="mb-1"><strong>Total pagado:</strong> <span class="text-success fw-bold fs-5">${{ order.amount_paid|intcomma }}</span></p>
+                </div>
+            </div>
+            
+            <hr class="my-4">
+            
             <h4 class="fw-bold text-success mb-4">
                 <i class="bi bi-box-seam me-2"></i> Productos de esta orden
             </h4>
@@ -23,11 +56,19 @@
                 {% for item in order_items %}
                 <div class="col-md-4">
                     <div class="card border-0 shadow-sm rounded-4 h-100">
-                        <img src="{{ item.final_image }}" class="card-img-top rounded-top-4" alt="Imagen personalizada">
+                        {% if item.final_image %}
+                            <img src="{{ item.final_image }}" class="card-img-top rounded-top-4" alt="Imagen personalizada" style="height: 250px; object-fit: cover;">
+                        {% else %}
+                            <div class="card-img-top rounded-top-4 bg-light d-flex align-items-center justify-content-center" style="height: 250px;">
+                                <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                            </div>
+                        {% endif %}
                         <div class="card-body text-center">
-                            <h5 class="card-title">{{ item.product.name }}</h5>
-                            <p class="card-text mb-1">Cantidad: {{ item.quantity }}</p>
-                            <p class="card-text text-success fw-bold">${{ item.price }}</p>
+                            <h5 class="card-title">{{ item.product.name|default:"Producto eliminado" }}</h5>
+                            <p class="card-text mb-1"><strong>Cantidad:</strong> {{ item.quantity }}</p>
+                            <p class="card-text mb-1"><strong>Precio unitario:</strong> ${{ item.price|intcomma }}</p>
+                            {% widthratio item.quantity 1 item.price as subtotal %}
+                            <p class="card-text text-success fw-bold fs-5">Subtotal: ${{ subtotal|intcomma }}</p>
                         </div>
                     </div>
                 </div>
@@ -39,13 +80,24 @@
             </div>
             {% endif %}
 
-            <div class="d-flex justify-content-center gap-3 mt-4">
-                <a href="{% url 'not_shipped_orders' %}" class="btn btn-outline-success">
-                    <i class="bi bi-arrow-left"></i> Volver a órdenes pendientes
-                </a>
-                <a href="{% url 'shipped_orders' %}" class="btn btn-outline-success">
-                    <i class="bi bi-arrow-left"></i> Volver a órdenes entregadas
-                </a>
+            <div class="d-flex justify-content-center gap-3 mt-4 flex-wrap">
+                {% if request.user == order.user %}
+                    <a href="{% url 'generate_receipt' order.id %}" class="btn btn-success">
+                        <i class="bi bi-download me-1"></i> Descargar Recibo PDF
+                    </a>
+                {% endif %}
+                {% if request.user.is_staff %}
+                    <a href="{% url 'not_shipped_orders' %}" class="btn btn-outline-success">
+                        <i class="bi bi-arrow-left"></i> Volver a órdenes pendientes
+                    </a>
+                    <a href="{% url 'shipped_orders' %}" class="btn btn-outline-success">
+                        <i class="bi bi-arrow-left"></i> Volver a órdenes entregadas
+                    </a>
+                {% else %}
+                    <a href="{% url 'order_history' %}" class="btn btn-outline-success">
+                        <i class="bi bi-arrow-left"></i> Volver al Historial
+                    </a>
+                {% endif %}
             </div>
         </div>
     </div>

@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+<header class="bg-success py-5">
+    <div class="container text-center text-white">
+        <h1 class="display-5 fw-bold">Mi Historial de Compras</h1>
+        <p class="lead fw-normal text-white-50">
+            Revisa todas tus órdenes y descarga tus recibos 📦
+        </p>
+    </div>
+</header>
+
+<section class="py-5 bg-light">
+    <div class="container px-4 px-lg-5">
+        {% if orders %}
+            <div class="row">
+                <div class="col-12">
+                    <div class="card shadow border-0 rounded-4">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h3 class="fw-bold text-success mb-0">
+                                    <i class="bi bi-receipt-cutoff me-2"></i>Tus Órdenes
+                                </h3>
+                                <span class="badge bg-success fs-6">{{ orders|length }} orden{{ orders|length|pluralize:"es" }}</span>
+                            </div>
+
+                            {% for month_key, month_orders in orders_by_month.items %}
+                                <div class="mb-5">
+                                    <h5 class="text-muted mb-3 border-bottom pb-2">
+                                        <i class="bi bi-calendar3 me-2"></i>
+                                        {{ month_orders.0.date_ordered|date:"F Y" }}
+                                    </h5>
+                                    
+                                    <div class="row g-3">
+                                        {% for order in month_orders %}
+                                            <div class="col-12">
+                                                <div class="card border-0 shadow-sm rounded-3 mb-3 hover-shadow">
+                                                    <div class="card-body p-4">
+                                                        <div class="row align-items-center">
+                                                            <div class="col-md-8">
+                                                                <div class="d-flex align-items-start mb-2">
+                                                                    <div class="flex-grow-1">
+                                                                        <h5 class="fw-bold mb-1">
+                                                                            Orden #{{ order.id }}
+                                                                            {% if order.shipped %}
+                                                                                <span class="badge bg-success ms-2">
+                                                                                    <i class="bi bi-check-circle me-1"></i>Enviada
+                                                                                </span>
+                                                                            {% else %}
+                                                                                <span class="badge bg-warning text-dark ms-2">
+                                                                                    <i class="bi bi-clock me-1"></i>Pendiente
+                                                                                </span>
+                                                                            {% endif %}
+                                                                        </h5>
+                                                                        <p class="text-muted mb-1">
+                                                                            <i class="bi bi-calendar me-1"></i>
+                                                                            {{ order.date_ordered|date:"d/m/Y" }} a las {{ order.date_ordered|time:"H:i" }}
+                                                                        </p>
+                                                                        <p class="text-muted mb-0">
+                                                                            <i class="bi bi-person me-1"></i>{{ order.full_name }}
+                                                                        </p>
+                                                                        {% if order.shipped and order.shipped_date %}
+                                                                            <p class="text-success small mb-0 mt-1">
+                                                                                <i class="bi bi-truck me-1"></i>
+                                                                                Enviada el {{ order.shipped_date|date:"d/m/Y" }}
+                                                                            </p>
+                                                                        {% endif %}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-4 text-md-end">
+                                                                <div class="mb-3">
+                                                                    <h4 class="fw-bold text-success mb-0">
+                                                                        ${{ order.amount_paid|intcomma }}
+                                                                    </h4>
+                                                                    <p class="text-muted small mb-0">
+                                                                        {% with items=order.items.all %}
+                                                                            {{ items|length }} producto{{ items|length|pluralize }}
+                                                                        {% endwith %}
+                                                                    </p>
+                                                                </div>
+                                                                <div class="d-flex flex-column flex-md-row gap-2 justify-content-md-end">
+                                                                    <a href="{% url 'order_details' order.id %}" 
+                                                                       class="btn btn-outline-primary btn-sm">
+                                                                        <i class="bi bi-eye me-1"></i>Ver Detalles
+                                                                    </a>
+                                                                    <a href="{% url 'generate_receipt' order.id %}" 
+                                                                       class="btn btn-success btn-sm">
+                                                                        <i class="bi bi-download me-1"></i>Descargar Recibo
+                                                                    </a>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="row">
+                <div class="col-12">
+                    <div class="card shadow border-0 rounded-4">
+                        <div class="card-body text-center py-5">
+                            <i class="bi bi-inbox display-1 text-muted mb-3"></i>
+                            <h3 class="fw-bold text-muted mb-3">No tienes órdenes aún</h3>
+                            <p class="text-muted mb-4">
+                                Cuando realices tu primera compra, aparecerá aquí tu historial de órdenes.
+                            </p>
+                            <a href="{% url 'home' %}" class="btn btn-success btn-lg">
+                                <i class="bi bi-shop me-2"></i>Ir a la Tienda
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<style>
+.hover-shadow {
+    transition: all 0.3s ease;
+}
+
+.hover-shadow:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.badge {
+    font-size: 0.75rem;
+    padding: 0.35em 0.65em;
+}
+
+.card {
+    transition: all 0.3s ease;
+}
+
+@media (max-width: 768px) {
+    .text-md-end {
+        text-align: left !important;
+        margin-top: 1rem;
+    }
+    
+    .d-flex.flex-md-row {
+        flex-direction: column !important;
+    }
+}
+</style>
+{% endblock %}
+

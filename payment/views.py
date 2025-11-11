@@ -6,6 +6,15 @@ from django.contrib import messages
 from payment.forms import PaymentForm
 from payment.models import Order, OrderItem
 from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.lib import colors
+from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
+from io import BytesIO
 
 def order_details(request, order_id):
     # Conseguimos la orden o tiramos 404 si no existe
@@ -146,6 +155,202 @@ def checkout(request):
     else:
         messages.error(request, "Debes iniciar sesión para proceder al pago.")
         return redirect('home')
+
+@login_required
+def order_history(request):
+    """Vista para mostrar el historial de compras del usuario"""
+    orders = Order.objects.filter(user=request.user).order_by('-date_ordered')
     
+    # Agrupar órdenes por mes para mejor organización
+    orders_by_month = {}
+    for order in orders:
+        month_key = order.date_ordered.strftime('%Y-%m')
+        if month_key not in orders_by_month:
+            orders_by_month[month_key] = []
+        orders_by_month[month_key].append(order)
     
+    context = {
+        'orders': orders,
+        'orders_by_month': orders_by_month,
+    }
     
+    return render(request, 'payment/order_history.html', context)
+
+@login_required
+def generate_receipt(request, order_id):
+    """Genera un recibo en PDF para una orden específica"""
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    order_items = OrderItem.objects.filter(order=order)
+    
+    # Crear el buffer para el PDF
+    buffer = BytesIO()
+    
+    # Crear el documento PDF
+    doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=30, leftMargin=30, topMargin=30, bottomMargin=30)
+    
+    # Contenedor para los elementos del PDF
+    elements = []
+    
+    # Estilos
+    styles = getSampleStyleSheet()
+    
+    # Estilos personalizados
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=24,
+        textColor=colors.HexColor('#198754'),
+        spaceAfter=30,
+        alignment=TA_CENTER,
+        fontName='Helvetica-Bold'
+    )
+    
+    heading_style = ParagraphStyle(
+        'CustomHeading',
+        parent=styles['Heading2'],
+        fontSize=14,
+        textColor=colors.HexColor('#0f5132'),
+        spaceAfter=12,
+        fontName='Helvetica-Bold'
+    )
+    
+    normal_style = ParagraphStyle(
+        'CustomNormal',
+        parent=styles['Normal'],
+        fontSize=10,
+        spaceAfter=6
+    )
+    
+    # Título
+    title = Paragraph("KulturaUrbana", title_style)
+    elements.append(title)
+    
+    subtitle = Paragraph("Recibo de Compra", styles['Heading2'])
+    elements.append(subtitle)
+    elements.append(Spacer(1, 0.3*inch))
+    
+    # Información de la empresa
+    company_info = [
+        ["<b>KulturaUrbana</b>", ""],
+        ["Tienda de Camisas Personalizadas", ""],
+        ["Email: info@kulturaurbana.com", f"<b>Orden #:</b> {order.id}"],
+        ["Teléfono: +1 (555) 123-4567", f"<b>Fecha:</b> {order.date_ordered.strftime('%d/%m/%Y %H:%M')}"],
+    ]
+    
+    company_table = Table(company_info, colWidths=[4*inch, 2.5*inch])
+    company_table.setStyle(TableStyle([
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('ALIGN', (1, 0), (1, -1), 'RIGHT'),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('FONTNAME', (0, 0), (0, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+        ('TOPPADDING', (0, 0), (-1, -1), 6),
+    ]))
+    elements.append(company_table)
+    elements.append(Spacer(1, 0.3*inch))
+    
+    # Línea divisoria
+    elements.append(Spacer(1, 0.1*inch))
+    
+    # Información del cliente
+    client_heading = Paragraph("<b>Información del Cliente</b>", heading_style)
+    elements.append(client_heading)
+    
+    # Parsear dirección de envío
+    shipping_lines = order.shipping_address.split('\n')
+    client_info_text = f"""
+    <b>Nombre:</b> {order.full_name}<br/>
+    <b>Email:</b> {order.email}<br/>
+    <b>Dirección de envío:</b><br/>
+    """
+    for line in shipping_lines:
+        if line.strip():
+            client_info_text += f"&nbsp;&nbsp;&nbsp;&nbsp;{line.strip()}<br/>"
+    
+    client_info = Paragraph(client_info_text, normal_style)
+    elements.append(client_info)
+    elements.append(Spacer(1, 0.2*inch))
+    
+    # Estado de la orden
+    status_text = "Enviada" if order.shipped else "Pendiente"
+    status_color = colors.HexColor('#198754') if order.shipped else colors.HexColor('#ffc107')
+    status_style = ParagraphStyle(
+        'StatusStyle',
+        parent=normal_style,
+        textColor=status_color,
+        fontName='Helvetica-Bold'
+    )
+    status = Paragraph(f"<b>Estado:</b> {status_text}", status_style)
+    elements.append(status)
+    elements.append(Spacer(1, 0.2*inch))
+    
+    # Productos
+    products_heading = Paragraph("<b>Productos</b>", heading_style)
+    elements.append(products_heading)
+    
+    # Tabla de productos
+    product_data = [['Producto', 'Cantidad', 'Precio Unit.', 'Subtotal']]
+    
+    total = 0
+    for item in order_items:
+        product_name = item.product.name if item.product else "Producto eliminado"
+        quantity = item.quantity
+        price = item.price
+        subtotal = quantity * price
+        total += subtotal
+        
+        product_data.append([
+            product_name,
+            str(quantity),
+            f"${price:,}",
+            f"${subtotal:,}"
+        ])
+    
+    # Agregar fila de total
+    product_data.append(['', '', '<b>TOTAL</b>', f'<b>${total:,}</b>'])
+    
+    product_table = Table(product_data, colWidths=[3*inch, 1*inch, 1.2*inch, 1.2*inch])
+    product_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#198754')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('ALIGN', (1, 0), (1, -1), 'CENTER'),
+        ('ALIGN', (2, 0), (-1, -1), 'RIGHT'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 11),
+        ('FONTSIZE', (0, 1), (-1, -2), 10),
+        ('FONTSIZE', (0, -1), (-1, -1), 11),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('TOPPADDING', (0, 0), (-1, 0), 12),
+        ('BOTTOMPADDING', (0, 1), (-1, -2), 8),
+        ('TOPPADDING', (0, 1), (-1, -2), 8),
+        ('GRID', (0, 0), (-1, -2), 1, colors.grey),
+        ('GRID', (0, -1), (-1, -1), 2, colors.HexColor('#198754')),
+        ('BACKGROUND', (0, -1), (-1, -1), colors.HexColor('#d1e7dd')),
+    ]))
+    elements.append(product_table)
+    elements.append(Spacer(1, 0.3*inch))
+    
+    # Notas
+    notes_heading = Paragraph("<b>Notas</b>", heading_style)
+    elements.append(notes_heading)
+    
+    notes_text = """
+    Gracias por tu compra en KulturaUrbana. Si tienes alguna pregunta sobre tu pedido, 
+    por favor contáctanos a través de nuestro email o teléfono.
+    <br/><br/>
+    <i>Este es un recibo generado automáticamente. Por favor, guárdalo para tus registros.</i>
+    """
+    notes = Paragraph(notes_text, normal_style)
+    elements.append(notes)
+    
+    # Construir el PDF
+    doc.build(elements)
+    
+    # Obtener el valor del buffer y crear la respuesta
+    buffer.seek(0)
+    response = HttpResponse(buffer.read(), content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="recibo_orden_{order.id}.pdf"'
+    
+    return response
